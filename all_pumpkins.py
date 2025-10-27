@@ -10,7 +10,7 @@ def init():
 def can_all_harvest():
 	return len(uninspected_pumpkins) == 0
 
-def do():
+def run():
 	global uninspected_pumpkins
 	while True:
 		next_uninspected_pumpkins = set()

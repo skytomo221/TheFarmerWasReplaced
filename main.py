@@ -2,7 +2,7 @@ from moves import move_pos
 import all_pumpkins
 import maze
 
-def do(i = 0):
+def run(i = 0):
     x_min = get_world_size() / max_drones() * i
     x_max = get_world_size() / max_drones() * (i + 1)
     move_pos((x_min, 0))
@@ -33,7 +33,7 @@ def do(i = 0):
 
 def create_worker_task(i = 0):
     def worker_task():
-        do(i)
+        run(i)
     return worker_task
 
 def main():
@@ -41,8 +41,8 @@ def main():
     while num_drones() < max_drones():
         spawn_drone(create_worker_task(i))
         i += 1
-    do()
+    run()
 
-#all_pumpkins.do()
+#all_pumpkins.run()
 main()
-# maze.do()
+# maze.run()

@@ -6,7 +6,7 @@ from directions import direction_to_vector, get_all_directions, get_opposite_dir
 def get_maze_size():
     return get_world_size() * 2**(num_unlocked(Unlocks.Mazes) - 1)
 
-def generate_maze():
+def generate():
     reset_pos()
     plant(Entities.Bush)
     use_item(Items.Weird_Substance, get_maze_size())
@@ -49,11 +49,11 @@ def move_along_path(path):
         elif position[1] < current_pos[1]:
             move(South)
 
-def do():
+def run():
     clear()
     cycles = 10
     while True:
-        generate_maze()
+        generate()
         maze_map = search()
         for i in range(cycles):
             path = resolve(maze_map)
