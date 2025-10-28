@@ -34,11 +34,11 @@ def type(value):
         return None
     elif str_value == "True" or str_value == "False":
         return bool
-    elif startswith(str_value, "[") or endswith(str_value, "]"):
+    elif str_value[0] == "[" and str_value[-1] == "]":
         return list
-    elif startswith(str_value, "(") or startswith(str_value, ")"):
+    elif str_value[0] == "(" and str_value[-1] == ")":
         return tuple
-    elif startswith(str_value, "{") or endswith(str_value, "}"):
+    elif str_value[0] == "{" and str_value[-1] == "}":
         if set(value) == value:
             return set
         else:
