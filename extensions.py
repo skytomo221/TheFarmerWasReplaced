@@ -28,14 +28,6 @@ def endswith(str, suffix):
 
 def type(value):
     str_value = str(value)
-    def is_number(str_value):
-        dot_count = 0
-        for char in str_value:
-            if char == ".":
-                dot_count += 1
-            elif char < "0" or char > "9":
-                return False
-        return dot_count <= 1
     if str_value == value:
         return str
     elif str_value == "None":
@@ -51,7 +43,7 @@ def type(value):
             return set
         else:
             return dict
-    elif is_number(str_value):
+    elif str_value[0] in "-0123456789":
         return number
     else:
         return value
