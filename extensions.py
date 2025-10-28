@@ -28,20 +28,6 @@ def endswith(str, suffix):
 
 def type(value):
     str_value = str(value)
-    def is_dict(str_value):
-        depth = 0
-        in_str = False
-        pre_char = ""
-        for char in str_value:
-            if char == ":" and depth == 0 and not in_str:
-                return True
-            elif char == "{" or char == "[" or char == "(":
-                depth += 1
-            elif char == "}" or char == "]" or char == ")":
-                depth -= 1
-            elif char == '"' or char == "'" and pre_char != "\\":
-                in_str = not in_str
-            pre_char = char
     def is_number(str_value):
         dot_count = 0
         for char in str_value:
@@ -61,10 +47,10 @@ def type(value):
     elif startswith(str_value, "(") or startswith(str_value, ")"):
         return tuple
     elif startswith(str_value, "{") or endswith(str_value, "}"):
-        if is_dict(str_value):
-            return dict
-        else:
+        if set(value) == value:
             return set
+        else:
+            return dict
     elif is_number(str_value):
         return number
     else:
