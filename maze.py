@@ -24,18 +24,35 @@ def search(maze_map = {}):
                 move(get_opposite_direction(direction))
     return maze_map
 
+def create_cost_map(maze_map, start, goal):
+    cost = 0
+    cost_map = {}
+    next_neighbors = [start]
+    while goal not in cost_map:
+        cost += 1
+        new_next_neighbors = []
+        for neighbor in next_neighbors:
+            if neighbor not in cost_map:
+                cost_map[neighbor] = cost
+                new_next_neighbors += maze_map[neighbor]
+        next_neighbors = new_next_neighbors
+    return cost_map
+
+def create_path(maze_map, cost_map, start, goal):
+    path = [goal]
+    current_pos = goal
+    while current_pos != start:
+        for neighbor in maze_map[current_pos]:
+            if neighbor in cost_map and cost_map[neighbor] == cost_map[current_pos] - 1:
+                path.insert(0, neighbor)
+                current_pos = neighbor
+                break
+    return path
+
 def resolve(maze_map, start = get_pos(), goal = measure(), path = []):
-    path = path + [start]
-    if start == goal:
-        return path
-    if start not in maze_map:
-        return None
-    for node in maze_map[start]:
-        if node not in path:
-            new_path = resolve(maze_map, node, goal, path)
-            if new_path:
-                return new_path
-    return None
+    cost_map = create_cost_map(maze_map, start, goal)
+    path = create_path(maze_map, cost_map, start, goal)
+    return path
 
 def move_along_path(path):
     for position in path[1:]:
