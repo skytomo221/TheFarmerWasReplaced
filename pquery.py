@@ -1,4 +1,13 @@
-
+def Object():
+    def __init__(self):
+        return self
+    def itself(self):
+        return self
+    return {
+        "members": { "queue": [] },
+        "methods": { (__init__, 0), (itself, 0) }
+    }
+class_difinitions = { "Object": Object }
 
 def Class(class_definition_function):
     class_definition = class_definition_function()
@@ -202,7 +211,15 @@ def Class(class_definition_function):
             16: constructor_sixteen_args(),
         }
         return constructor_mapping[args_count]
-
+    super_class_definition = Object()
+    if "extends" in class_definition:
+        global class_definitions
+        super_class_definition = class_definitions["extends"]
+    for member in super_class_definition["members"]:
+        instance[member] = super_class_definition["members"][member]
+    for function_definition in super_class_definition["methods"]:
+        function, args_count = function_definition
+        instance[str(function)] = generate_method(function, args_count)
     constructor_definition = None
     for member in class_definition["members"]:
         instance[member] = class_definition["members"][member]
@@ -212,10 +229,13 @@ def Class(class_definition_function):
         if str(function) == "__init__":
             constructor_definition = function_definition
     _, args_count = constructor_definition
+    class_difinitions[str(class_definition_function)] = class_definition
     return generate_class(instance, args_count)
 
+Object = Class(Object)
+
 def Queue():
-    def __init__(self, list = []):
+    def __init__(self, list):
         self["queue"] = list or []
         return self
     def enqueue(self, args):
@@ -230,10 +250,13 @@ def Queue():
     }
 
 Queue = Class(Queue)
+print(Queue)
 begin = get_tick_count()
 q = Queue([])
+quick_print(q)
 end = get_tick_count()
 print(end - begin)
 q["enqueue"](1)
 q["enqueue"](2)
-print(q["queue"])
+quick_print(q["itself"]())
+quick_print(q)
