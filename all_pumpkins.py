@@ -1,17 +1,19 @@
 from moves import move_pos
 
-uninspected_pumpkins = set()
-
-def init():
-    for x in range(get_world_size()):
+def init(i = 0):
+    uninspected_pumpkins = set()
+    x_min = (get_world_size() / max_drones() * i) // 1
+    x_max = (get_world_size() / max_drones() * (i + 1)) // 1
+    for x in range(x_min, x_max):
         for y in range(get_world_size()):
             uninspected_pumpkins.add((x, y))
+    return uninspected_pumpkins
 
-def can_all_harvest():
+def can_all_harvest(uninspected_pumpkins):
     return len(uninspected_pumpkins) == 0
 
-def run():
-    global uninspected_pumpkins
+def run(i = 0):
+    uninspected_pumpkins = init(i)
     while True:
         next_uninspected_pumpkins = set()
         for uninspected_pumpkin in uninspected_pumpkins:
@@ -27,8 +29,24 @@ def run():
             plant(Entities.Pumpkin)
 
         uninspected_pumpkins = next_uninspected_pumpkins
-        if can_all_harvest():
-            harvest()
-            init()
+        if can_all_harvest(uninspected_pumpkins):
+            if i != 0:
+                return
+            elif num_drones() == 1:
+                harvest()
+                return
+
+def create_worker_task(i = 0):
+    def worker_task():
+        run(i)
+    return worker_task
+
+def main():
+    while True:
+        i = 1
+        while num_drones() < max_drones():
+            spawn_drone(create_worker_task(i))
+            i += 1
+        run()
 
 init()
