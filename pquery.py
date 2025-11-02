@@ -96,6 +96,38 @@ def Class(class_definition_function):
             16: method_sixteen_args(),
         }
         return method_mapping[args_count]
+    def register_special_methods(instance):
+        def get_class():
+            def method():
+                return class_definition_function
+            return method
+        instance["class"] = get_class()
+        def superclass():
+            def method():
+                if class_definition_function == defined_classes["Object"]:
+                    return None
+                super_class_definition_function = defined_classes["Object"]
+                if "extends" in class_definition:
+                    super_class_definition_function = defined_classes[class_definition["extends"]]
+                return super_class_definition_function
+            return method
+        instance["superclass"] = superclass()
+        def is_instance_of():
+            def method(class_def_function):
+                current_class_function = class_definition_function
+                while True:
+                    if current_class_function == class_def_function:
+                        return True
+                    if current_class_function == defined_classes["Object"]:
+                        break
+                    super_class_definition_function = defined_classes["Object"]
+                    current_class_definition = current_class_function()
+                    if "extends" in current_class_definition:
+                        super_class_definition_function = defined_classes[current_class_definition["extends"]]
+                    current_class_function = super_class_definition_function
+                return False
+            return method
+        instance["is_a?"] = is_instance_of()
     def register_super_class_members(instance, super_class_definition_function):
         super_class_definition = super_class_definition_function()
         for member in super_class_definition["members"]:
@@ -132,6 +164,7 @@ def Class(class_definition_function):
                 function_name = function_definition[2]
             instance[function_name] = generate_method(instance, function, args_count)
     def setup_instance(instance, class_definition):
+        register_special_methods(instance)
         setup_superclass_relations(instance, class_definition_function)
         register_members(instance, class_definition)
         register_methods(instance, class_definition)

@@ -6,6 +6,10 @@ obj2 = Object()
 
 test("itself is equal to itself", expected_to(eq, obj1, obj1))
 test("different objects are not equal", expected_to(not_eq, obj1, obj2))
+test("object hash is consistent", expected_to(eq, obj1["hash"](), obj1["hash"]()))
+test("different objects have different hashes", expected_to(not_eq, obj1["hash"](), obj2["hash"]()))
+test("object class is Object", expected_to(eq, str(obj1["class"]()), "Object"))
+test("objects have the same class", expected_to(eq, obj1["class"](), obj2["class"]()))
 
 queue = Queue([1, 2, 3])
 queue2 = Queue([])
@@ -50,6 +54,7 @@ def TestClass():
   def method_sixteen_args(self, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16):
     return arg1 + arg2 + arg3 + arg4 + arg5 + arg6 + arg7 + arg8 + arg9 + arg10 + arg11 + arg12 + arg13 + arg14 + arg15 + arg16
   def __init__(self, num):
+    self["super"]["__init__"]()
     self["num"] = num
   def is_even(self):
     return self["num"] % 2 == 0
@@ -98,5 +103,42 @@ test("method with fourteen args returns their sum", expected_to(eq, test_class["
 test("method with fifteen args returns their sum", expected_to(eq, test_class["method_fifteen_args"](1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15), 120))
 test("method with sixteen args returns their sum", expected_to(eq, test_class["method_sixteen_args"](1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16), 136))
 test("is_even returns true for even numbers", expected_to(eq, test_class["even?"](), True))
+
+def TestClass2():
+  def __init__(self):
+    self["super"]["__init__"]()
+  def test2_method(self):
+    return "TestClass2 method called"
+  return {
+    "members": { },
+    "methods": [
+      (__init__, 0),
+      (test2_method, 0)
+    ]
+  }
+TestClass2 = Class(TestClass2)
+
+def TestClass3():
+  def __init__(self):
+    self["super"]["__init__"]()
+  def test3_method(self):
+    return "TestClass3 method called"
+  return {
+    "extends": "TestClass2",
+    "members": { },
+    "methods": [
+      (__init__, 0),
+      (test3_method, 0)
+    ]
+  }
+TestClass3 = Class(TestClass3)
+
+t2 = TestClass2()
+t3 = TestClass3()
+
+test("TestClass3 inherits from TestClass2", expected_to(eq, t3["test2_method"](), "TestClass2 method called"))
+test("TestClass3 method works", expected_to(eq, t3["test3_method"](), "TestClass3 method called"))
+test("TestClass3 is instance of TestClass3", expected_to(eq, t3["is_a?"](t3["class"]()), True))
+test("TestClass3 is instance of TestClass2", expected_to(eq, t3["is_a?"](t2["class"]()), True))
 
 report()
