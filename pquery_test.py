@@ -54,7 +54,7 @@ def TestClass():
   def is_even(self):
     return self["num"] % 2 == 0
   return {
-    "menbers": { "num": None },
+    "members": { "num": None },
     "methods": [
       (method_no_args, 0),
       (method_one_arg, 1),
