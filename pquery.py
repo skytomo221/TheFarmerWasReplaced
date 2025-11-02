@@ -1,52 +1,6 @@
 # defined_classes は、定義されたクラスを格納するグローバル変数です。
 defined_classes = {}
 
-# Classを定義する前に、一時的に class_for_object を使って Object クラスを定義しておく必要があります。
-def class_for_object(class_definition_function):
-    class_definition = class_definition_function()
-    def generate_method(instance, function, _args_count):
-        def method():
-            return function(instance)
-        return method
-    def register_members(instance, class_definition):
-        for member in class_definition["members"]:
-            instance[member] = class_definition["members"][member]
-    def register_methods(instance, class_definition):
-        for function_definition in class_definition["methods"]:
-            function = function_definition[0]
-            args_count = function_definition[1]
-            function_name = str(function)
-            if len(function_definition) != 2:
-                function_name = function_definition[2]
-            instance[function_name] = generate_method(instance, function, args_count)
-    def setup_instance(instance, class_definition):
-        register_members(instance, class_definition)
-        register_methods(instance, class_definition)
-    def generate_class(_args_count):
-        def constructor():
-            instance = {}
-            setup_instance(instance, class_definition)
-            instance["__init__"]()
-            return instance
-        return constructor
-    global defined_classes
-    defined_classes[str(class_definition_function)] = class_definition
-    return generate_class(0)
-
-def Object():
-    def __init__(self):
-        self["_hash"] = random() * (2 ** 53) // 1
-        return self
-    def hash(self):
-        return self["_hash"]
-    def itself(self):
-        return self
-    return {
-        "members": { "_hash": None },
-        "methods": { (__init__, 0), (hash, 0), (itself, 0) }
-    }
-Object = class_for_object(Object)
-
 def Class(class_definition_function):
     class_definition = class_definition_function()
     def generate_method(instance, function, args_count):
@@ -146,6 +100,7 @@ def Class(class_definition_function):
         for member in super_class_definition["members"]:
             instance[member] = super_class_definition["members"][member]
     def register_super_class_methods(instance, super_class_definition):
+        instance["super"] = {}
         for function_definition in super_class_definition["methods"]:
             function = function_definition[0]
             args_count = function_definition[1]
@@ -153,12 +108,16 @@ def Class(class_definition_function):
             if len(function_definition) != 2:
                 function_name = function_definition[2]
             instance[function_name] = generate_method(instance, function, args_count)
+            instance["super"][function_name] = instance[function_name]
     def setup_superclass_relations(instance, class_definition):
+        if class_definition == defined_classes["Object"]:
+            return
         super_class_definition = defined_classes["Object"]
         if "extends" in class_definition:
             super_class_definition = defined_classes[class_definition["extends"]]
         register_super_class_members(instance, super_class_definition)
         register_super_class_methods(instance, super_class_definition)
+        setup_superclass_relations(instance, super_class_definition)
     def register_members(instance, class_definition):
         for member in class_definition["members"]:
             instance[member] = class_definition["members"][member]
@@ -179,7 +138,7 @@ def Class(class_definition_function):
             def constructor():
                 instance = {}
                 setup_instance(instance, class_definition)
-                instance["__init__"](instance)
+                instance["__init__"]()
                 return instance
             return constructor
         def constructor_one_arg():
@@ -324,8 +283,23 @@ def Class(class_definition_function):
     defined_classes[str(class_definition_function)] = class_definition
     return generate_class(args_count)
 
+def Object():
+    def __init__(self):
+        self["_hash"] = random() * (2 ** 53) // 1
+        return self
+    def hash(self):
+        return self["_hash"]
+    def itself(self):
+        return self
+    return {
+        "members": { "_hash": None },
+        "methods": { (__init__, 0), (hash, 0), (itself, 0) }
+    }
+Object = Class(Object)
+
 def Queue():
     def __init__(self, list):
+        self["super"]["__init__"]()
         self["queue"] = list or []
         return self
     def enqueue(self, args):
