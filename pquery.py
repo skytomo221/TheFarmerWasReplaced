@@ -96,11 +96,13 @@ def Class(class_definition_function):
             16: method_sixteen_args(),
         }
         return method_mapping[args_count]
-    def register_super_class_members(instance, super_class_definition):
+    def register_super_class_members(instance, super_class_definition_function):
+        super_class_definition = super_class_definition_function()
         for member in super_class_definition["members"]:
             instance[member] = super_class_definition["members"][member]
-    def register_super_class_methods(instance, super_class_definition):
+    def register_super_class_methods(instance, super_class_definition_function):
         instance["super"] = {}
+        super_class_definition = super_class_definition_function()
         for function_definition in super_class_definition["methods"]:
             function = function_definition[0]
             args_count = function_definition[1]
@@ -109,15 +111,15 @@ def Class(class_definition_function):
                 function_name = function_definition[2]
             instance[function_name] = generate_method(instance, function, args_count)
             instance["super"][function_name] = instance[function_name]
-    def setup_superclass_relations(instance, class_definition):
-        if class_definition == defined_classes["Object"]:
+    def setup_superclass_relations(instance, class_definition_function):
+        if class_definition_function == defined_classes["Object"]:
             return
-        super_class_definition = defined_classes["Object"]
-        if "extends" in class_definition:
-            super_class_definition = defined_classes[class_definition["extends"]]
-        register_super_class_members(instance, super_class_definition)
-        register_super_class_methods(instance, super_class_definition)
-        setup_superclass_relations(instance, super_class_definition)
+        super_class_definition_function = defined_classes["Object"]
+        if "extends" in class_definition_function():
+            super_class_definition_function = defined_classes[class_definition["extends"]]
+        register_super_class_members(instance, super_class_definition_function)
+        register_super_class_methods(instance, super_class_definition_function)
+        setup_superclass_relations(instance, super_class_definition_function)
     def register_members(instance, class_definition):
         for member in class_definition["members"]:
             instance[member] = class_definition["members"][member]
@@ -130,7 +132,7 @@ def Class(class_definition_function):
                 function_name = function_definition[2]
             instance[function_name] = generate_method(instance, function, args_count)
     def setup_instance(instance, class_definition):
-        setup_superclass_relations(instance, class_definition)
+        setup_superclass_relations(instance, class_definition_function)
         register_members(instance, class_definition)
         register_methods(instance, class_definition)
     def generate_class(args_count):
@@ -280,7 +282,7 @@ def Class(class_definition_function):
             args_count = function_args_count
             break
     global defined_classes
-    defined_classes[str(class_definition_function)] = class_definition
+    defined_classes[str(class_definition_function)] = class_definition_function
     return generate_class(args_count)
 
 def Object():
