@@ -1,7 +1,12 @@
-# defined_classes は、定義されたクラスを格納するグローバル変数です。
+# defined_classes は、定義されたクラス名（文字列）をキーとして、クラス定義関数を格納するグローバル変数です。
 defined_classes = {}
+# defined_constructors は、定義されたクラスのコンストラクタをキーとして、クラス定義関数を格納するグローバル変数です。
+defined_constructors = {}
 
 def Class(class_definition_function):
+    # もしコンストラクタが渡されたら、クラス定義関数を返す
+    if class_definition_function in defined_constructors:
+        return defined_constructors[class_definition_function]
     class_definition = class_definition_function()
     def generate_method(instance, function, args_count):
         # C# には「可変長ジェネリック型引数」（variadic generics）は存在せず、
@@ -316,7 +321,9 @@ def Class(class_definition_function):
             break
     global defined_classes
     defined_classes[str(class_definition_function)] = class_definition_function
-    return generate_class(args_count)
+    constructor = generate_class(args_count)
+    defined_constructors[constructor] = class_definition_function
+    return constructor
 
 def Object():
     def __init__(self):

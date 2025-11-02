@@ -8,7 +8,7 @@ test("itself is equal to itself", expected_to(eq, obj1, obj1))
 test("different objects are not equal", expected_to(not_eq, obj1, obj2))
 test("object hash is consistent", expected_to(eq, obj1["hash"](), obj1["hash"]()))
 test("different objects have different hashes", expected_to(not_eq, obj1["hash"](), obj2["hash"]()))
-test("object class is Object", expected_to(eq, str(obj1["class"]()), "Object"))
+test("object class is Object", expected_to(eq, obj1["class"](), Class(Object)))
 test("objects have the same class", expected_to(eq, obj1["class"](), obj2["class"]()))
 
 queue = Queue([1, 2, 3])
@@ -138,7 +138,7 @@ t3 = TestClass3()
 
 test("TestClass3 inherits from TestClass2", expected_to(eq, t3["test2_method"](), "TestClass2 method called"))
 test("TestClass3 method works", expected_to(eq, t3["test3_method"](), "TestClass3 method called"))
-test("TestClass3 is instance of TestClass3", expected_to(eq, t3["is_a?"](t3["class"]()), True))
-test("TestClass3 is instance of TestClass2", expected_to(eq, t3["is_a?"](t2["class"]()), True))
+test("TestClass3 is instance of TestClass3", expected_to(eq, t3["is_a?"](Class(TestClass2)), True))
+test("TestClass3 is instance of TestClass2", expected_to(eq, t3["is_a?"](Class(TestClass3)), True))
 
 report()
