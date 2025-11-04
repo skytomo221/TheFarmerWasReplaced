@@ -1,15 +1,29 @@
 from moves import reset_pos, move_pos
 
-while True:
-    reset_pos()
-    for x in range(0, get_world_size()):
-        for y in range(0, get_world_size()):
+def plant_cacti(i = 0):
+    x_min = (get_world_size() / max_drones() * i) // 1
+    x_max = (get_world_size() / max_drones() * (i + 1)) // 1
+    move_pos((x_min, 0))
+    for _ in range(x_min, x_max):
+        for _ in range(0, get_world_size()):
             if get_ground_type() == Grounds.Grassland:
                 till()
             plant(Entities.Cactus)
             move(North)
         move(East)
-    for x in range(get_world_size()):
+
+def vertical_sort(i = 0):
+    x_min = (get_world_size() / max_drones() * i) // 1
+    x_max = (get_world_size() / max_drones() * (i + 1)) // 1
+    move_pos((x_min, 0))
+    for x in range(x_min, x_max):
+        for _ in range(0, get_world_size()):
+            if get_ground_type() == Grounds.Grassland:
+                till()
+            plant(Entities.Cactus)
+            move(North)
+        move(East)
+    for x in range(x_min, x_max):
         move_pos((x, 0))
         sorted_max = get_world_size() - 1
         sorted_min = 0
@@ -26,8 +40,19 @@ while True:
                     swap(South)
                 move(South)
             sorted_min += 1
-    reset_pos()
-    for y in range(get_world_size()):
+
+def horizontal_sort(i = 0):
+    y_min = (get_world_size() / max_drones() * i) // 1
+    y_max = (get_world_size() / max_drones() * (i + 1)) // 1
+    move_pos((y_min, 0))
+    for x in range(0, get_world_size()):
+        for y in range(y_min, y_max):
+            if get_ground_type() == Grounds.Grassland:
+                till()
+            plant(Entities.Cactus)
+            move(North)
+        move(East)
+    for y in range(y_min, y_max):
         move_pos((0, y))
         sorted_max = get_world_size() - 1
         sorted_min = 0
@@ -44,4 +69,44 @@ while True:
                     swap(West)
                 move(West)
             sorted_min += 1
-    harvest()
+
+def create_worker_task_plant_cacti(i = 0):
+    def worker_task():
+        plant_cacti(i)
+    return worker_task
+
+def create_worker_task_vertical_sort(i = 0):
+    def worker_task():
+        vertical_sort(i)
+    return worker_task
+
+def create_worker_task_horizontal_sort(i = 0):
+    def worker_task():
+        horizontal_sort(i)
+    return worker_task
+
+def main():
+    while True:
+        reset_pos()
+        i = 1
+        while num_drones() < max_drones():
+            spawn_drone(create_worker_task_plant_cacti(i))
+            i += 1
+        plant_cacti()
+        while num_drones() != 1:
+            pass
+        i = 1
+        while num_drones() < max_drones():
+            spawn_drone(create_worker_task_vertical_sort(i))
+            i += 1
+        vertical_sort()
+        while num_drones() != 1:
+            pass
+        i = 1
+        while num_drones() < max_drones():
+            spawn_drone(create_worker_task_horizontal_sort(i))
+            i += 1
+        horizontal_sort()
+        while num_drones() != 1:
+            pass
+        harvest()
