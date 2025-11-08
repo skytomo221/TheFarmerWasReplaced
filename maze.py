@@ -67,8 +67,16 @@ def resolve(walls, start = get_pos(), goal = measure(), path = []):
     path = create_path(walls, cost_map, start, goal)
     return path
 
-def move_along_path(path):
+def update_walls(walls):
+    for direction in get_all_directions():
+        wall_pos = add_pos(get_pos(), div_pos(direction_to_vector(direction), 2))
+        if wall_pos in walls and can_move(direction):
+            walls.remove(wall_pos)
+    return walls
+
+def move_along_path(path, walls):
     for position in path[1:]:
+        update_walls(walls)
         current_pos = get_pos()
         if position[0] > current_pos[0]:
             move(East)
@@ -81,13 +89,13 @@ def move_along_path(path):
 
 def run():
     clear()
-    cycles = 10
+    cycles = 100
     while True:
         generate()
         walls = search()
         for i in range(cycles):
             path = resolve(walls)
-            move_along_path(path)
+            move_along_path(path, walls)
             if i < cycles - 1:
                 use_item(Items.Weird_Substance, get_maze_size())
             else:
